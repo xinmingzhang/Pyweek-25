@@ -132,14 +132,11 @@ class Piece(RelativeLayout):
             dest_x = int(self.rotation_center[0] + child.co_y - self.rotation_center[1])
             dest_y = int(self.rotation_center[0] - child.co_x + self.rotation_center[1])
             child.co_x, child.co_y = dest_x, dest_y
-            child.rescale()
+            # child.rescale()
 
 class Margin(BoxLayout):
     pass
 
-
-class Pause(Popup):
-    pass
 
 
 class GameOver(Popup):

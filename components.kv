@@ -59,46 +59,35 @@
             size:self.size
             pos:self.pos
 
-<Pause>:
-    title:'Pause'
-    RelativeLayout:
-        Button:
-            pos_hint:{'center_x':0.2,'center_y':0.6}
-            text:'continue'
-            on_press:
-                root.dismiss()
-                app.root.current_screen.falling()
-                app.root.current_screen.rot()
-        Button:
-            pos_hint:{'center_x':0.5,'center_y':0.6}
-            text:'replay'
-            on_press:
-                root.dismiss()
-                app.root.current_screen.on_enter()
-        Button:
-            pos_hint:{'center_x':0.8,'center_y':0.6}
-            text:'exit'
-            on_press:
-                app.root.transition.direction = 'up'
-                root.dismiss()
-                app.root.current='title'
 
 <GameOver>:
     title:'Game over'
-    RelativeLayout:
-        Button:
-            pos_hint:{'center_x':0.3,'center_y':0.6}
-            text:'replay'
-            on_press:
-                root.dismiss()
-                app.root.current_screen.on_enter()
-        Button:
-            pos_hint:{'center_x':0.8,'center_y':0.6}
-            text:'exit'
-            on_press:
-                app.root.transition.direction = 'up'
-                root.dismiss()
-                app.root.current='title'
+    size_hint:0.8,0.8
+    BoxLayout:
+        BoxLayout:
+            orientation:'vertical'
+            Label:
+                text:'Score   ' + str(app.root.current_screen.score)
+            Label:
+                text:'High Score   ' + str(app.root.current_screen.high_score)
+            Widget:
+            BoxLayout:
+                orientation:'horizontal'
+                Widget:
+                Button:
+                    text:'replay'
+                    on_press:
+                        root.dismiss()
+                        app.root.current_screen.on_enter()
+                Widget:
+                Button:
+                    text:'back'
+                    on_press:
+                        app.root.transition.direction = 'up'
+                        root.dismiss()
+                        app.root.current='title'
+                Widget:
+            Widget:
 
 <NumKey>:
     markup:True

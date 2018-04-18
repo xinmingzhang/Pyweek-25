@@ -51,6 +51,20 @@
     StackLayout:
         orientation: 'tb-lr' if W.height < W.width else 'lr-tb'
         Margin:
+            BoxLayout:
+                orientation:'vertical' if W.height < W.width else 'horizontal'
+                Label:
+                    text:'p'
+                Label:
+                    text:'y'
+                Label:
+                    text:'w'
+                Label:
+                    text:'e'
+                Label:
+                    text:'e'
+                Label:
+                    text:'k'
         BoxLayout:
             orientation:'vertical'
             size_hint:None,None
@@ -101,3 +115,17 @@
                     on_press: root.password += '0'
                 Widget:
         Margin:
+            BoxLayout:
+                orientation:'vertical' if W.height < W.width else 'horizontal'
+                Label:
+                    text:'p'
+                Label:
+                    text:'y'
+                Label:
+                    text:'w'
+                Label:
+                    text:'e'
+                Label:
+                    text:'e'
+                Label:
+                    text:'k'

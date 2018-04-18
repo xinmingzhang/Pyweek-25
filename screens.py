@@ -2,8 +2,11 @@ from kivy.uix.screenmanager import Screen
 from kivy.lang import Builder
 from kivy.gesture import GestureDatabase, Gesture
 from kivy.properties import ObjectProperty,NumericProperty,StringProperty
-from components import Pause,GameOver,Piece
+from components import GameOver,Piece
 from kivy.clock import Clock
+from kivy.core.window import Window
+from kivy.graphics.texture import Texture
+from kivy.graphics import Rectangle
 import json
 from time import strftime
 from kivy.app import App
@@ -48,7 +51,6 @@ class Game(Screen):
         self.score = 0
         self.level = 1
         self.lines = 0
-        self.pause = Pause()
         self.gameover = GameOver()
         self.n_piece_1.update_grids()
         self.n_piece_1.clear_blocks()
@@ -69,6 +71,18 @@ class Game(Screen):
         self.falling_1 = Clock.schedule_interval(self.piece_1_falling, 1.0 / self.level)
         self.falling_2 = Clock.schedule_interval(self.piece_2_falling, 1.0 / self.level)
         Clock.schedule_interval(self.update_time, 0)
+        Window.bind(on_key_down=self._keydown)
+
+    def _keydown(self,instance, key, scancode=None, codepoint=None, modifier=None):
+        if key in (119,273):
+            self.on_bottom_to_top_line()
+        elif key in (115,274):
+            self.on_top_to_bottom_line()
+        elif key in (97,276):
+            self.on_right_to_left_line()
+        elif key in (100,275):
+            self.on_left_to_right_line()
+
 
     def on_score(self,*args):
         if self.score > self.high_score:
@@ -237,14 +251,10 @@ class Game(Screen):
 
     def on_touch_down(self, touch):
         if touch.is_triple_tap:
-            self.show_pause()
+            pass
         touch.ud['gesture_path'] = [(touch.x, touch.y)]
         super(Game, self).on_touch_down(touch)
 
-    def show_pause(self, *args):
-        self.pause.open()
-        self.falling_1.cancel()
-        self.falling_2.cancel()
 
     def on_touch_move(self, touch):
         touch.ud['gesture_path'].append((touch.x, touch.y))
@@ -277,6 +287,9 @@ class Game(Screen):
             child.co_x += 3
             child.co_y += 19
         self.piece_2 = self.next_piece_2
+        for child in self.piece_2.children:
+            child.x_scale = 1
+            child.y_scale = 1
         self.piece_2.rotation_center = [self.piece_2.rotation_center[0] + 3, self.piece_2.rotation_center[1] + 19]
         self.board2.add_widget(self.piece_2)
         self.next_piece_2 = Piece(0, 0)
@@ -341,6 +354,8 @@ class Game(Screen):
         for child in self.piece_1.children:
             i, j = child.co_x, child.co_y
             self.board1.grids[i, j].active = True
+            self.board1.grids[i,j].x_scale = 1
+            self.board1.grids[i,j].y_scale = 1
         self.clear_p1_line()
         self.board1.remove_widget(self.piece_1)
         self.add_piece_1()
@@ -356,6 +371,7 @@ class Game(Screen):
     def clear_p1_line(self, *args):
         lines = set([block.co_y for block in self.piece_1.children])
         delete_lines = []
+
         for line in lines:
             if False not in self.board1.grids_state[:][line]:
                 delete_lines.append(line)
@@ -371,6 +387,15 @@ class Game(Screen):
                     elif j > delete_lines[0] and self.board1.grids[i, j].active == True:
                         self.board1.grids[i, j].active = False
                         self.board1.grids[i, j - 1].active = True
+            for j in range(21,-1,-1):
+                for i in range(9,-1,-1):
+                    if self.board2.grids[i,j].active == True:
+                        self.board2.grids[i,j].active = False
+                        self.board2.grids[i,j+1].active = True
+            seed = int(self.time[-1])
+            for i in range(9,-1,-1):
+                if i != seed:
+                    self.board2.grids[i,0].active = True
         elif n == 2:
             self.lines += 2
             self.score += 100 * self.level
@@ -384,6 +409,16 @@ class Game(Screen):
                     elif delete_lines[1] < j and self.board1.grids[i, j].active == True:
                         self.board1.grids[i, j].active = False
                         self.board1.grids[i, j - 2].active = True
+            for j in range(21,-1,-1):
+                for i in range(9,-1,-1):
+                    if self.board2.grids[i,j].active == True:
+                        self.board2.grids[i,j].active = False
+                        self.board2.grids[i,j+2].active = True
+            seed = int(self.time[-1])
+            for i in range(9,-1,-1):
+                if i != seed:
+                    self.board2.grids[i,0].active = True
+                    self.board2.grids[i, 1].active = True
         elif n == 3:
             self.lines += 3
             self.score += 300 * self.level
@@ -400,6 +435,17 @@ class Game(Screen):
                     elif delete_lines[2] < j and self.board1.grids[i, j].active == True:
                         self.board1.grids[i, j].active = False
                         self.board1.grids[i, j - 3].active = True
+            for j in range(21,-1,-1):
+                for i in range(9,-1,-1):
+                    if self.board2.grids[i,j].active == True:
+                        self.board2.grids[i,j].active = False
+                        self.board2.grids[i,j+3].active = True
+            seed = int(self.time[-1])
+            for i in range(9,-1,-1):
+                if i != seed:
+                    self.board2.grids[i,0].active = True
+                    self.board2.grids[i, 1].active = True
+                    self.board2.grids[i, 2].active = True
         elif n == 4:
             self.lines += 4
             self.score += 1200 * self.level
@@ -419,6 +465,18 @@ class Game(Screen):
                     elif delete_lines[3] < j and self.board1.grids[i, j].active == True:
                         self.board1.grids[i, j].active = False
                         self.board1.grids[i, j - 4].active = True
+            for j in range(21,-1,-1):
+                for i in range(9,-1,-1):
+                    if self.board2.grids[i,j].active == True:
+                        self.board2.grids[i,j].active = False
+                        self.board2.grids[i,j+4].active = True
+            seed = int(self.time[-1])
+            for i in range(9,-1,-1):
+                if i != seed:
+                    self.board2.grids[i,0].active = True
+                    self.board2.grids[i, 1].active = True
+                    self.board2.grids[i, 2].active = True
+                    self.board2.grids[i, 3].active = True
 
     def clear_p2_line(self, *args):
         lines = set([block.co_y for block in self.piece_2.children])
@@ -438,6 +496,19 @@ class Game(Screen):
                     elif j > delete_lines[0] and self.board2.grids[i, j].active == True:
                         self.board2.grids[i, j].active = False
                         self.board2.grids[i, j - 1].active = True
+            for j in range(21,-1,-1):
+                for i in range(9,-1,-1):
+                    if self.board1.grids[i,j].active == True:
+                        self.board1.grids[i,j].active = False
+                        self.board1.grids[i,j+1].active = True
+                        self.board1.grids[i,j+1].x_scale = 1
+                        self.board1.grids[i,j+1].y_scale = 1
+            seed = int(self.time[-1])
+            for i in range(9,-1,-1):
+                if i != seed:
+                    self.board1.grids[i,0].active = True
+                    self.board1.grids[i,0].x_scale = 1
+                    self.board1.grids[i,0].y_scale = 1
         elif n == 2:
             self.lines += 2
             self.score += 100 * self.level
@@ -451,6 +522,22 @@ class Game(Screen):
                     elif delete_lines[1] < j and self.board2.grids[i, j].active == True:
                         self.board2.grids[i, j].active = False
                         self.board2.grids[i, j - 2].active = True
+            for j in range(21,-1,-1):
+                for i in range(9,-1,-1):
+                    if self.board1.grids[i,j].active == True:
+                        self.board1.grids[i,j].active = False
+                        self.board1.grids[i,j+2].active = True
+                        self.board1.grids[i,j+2].x_scale = 1
+                        self.board1.grids[i,j+2].y_scale = 1
+            seed = int(self.time[-1])
+            for i in range(9,-1,-1):
+                if i != seed:
+                    self.board1.grids[i,0].active = True
+                    self.board1.grids[i,0].x_scale = 1
+                    self.board1.grids[i,0].y_scale = 1
+                    self.board1.grids[i, 1].active = True
+                    self.board1.grids[i,1].x_scale = 1
+                    self.board1.grids[i,1].y_scale = 1
         elif n == 3:
             self.lines += 3
             self.score += 300 * self.level
@@ -467,6 +554,25 @@ class Game(Screen):
                     elif delete_lines[2] < j and self.board2.grids[i, j].active == True:
                         self.board2.grids[i, j].active = False
                         self.board2.grids[i, j - 3].active = True
+            for j in range(21,-1,-1):
+                for i in range(9,-1,-1):
+                    if self.board1.grids[i,j].active == True:
+                        self.board1.grids[i,j].active = False
+                        self.board1.grids[i,j+3].active = True
+                        self.board1.grids[i,j+3].x_scale = 1
+                        self.board1.grids[i,j+3].y_scale = 1
+            seed = int(self.time[-1])
+            for i in range(9,-1,-1):
+                if i != seed:
+                    self.board1.grids[i,0].active = True
+                    self.board1.grids[i,0].x_scale = 1
+                    self.board1.grids[i,0].y_scale = 1
+                    self.board1.grids[i, 1].active = True
+                    self.board1.grids[i,1].x_scale = 1
+                    self.board1.grids[i,1].y_scale = 1
+                    self.board1.grids[i, 2].active = True
+                    self.board1.grids[i,2].x_scale = 1
+                    self.board1.grids[i,2].y_scale = 1
         elif n == 4:
             self.lines += 4
             self.score += 1200 * self.level
@@ -486,13 +592,70 @@ class Game(Screen):
                     elif delete_lines[3] < j and self.board2.grids[i, j].active == True:
                         self.board2.grids[i, j].active = False
                         self.board2.grids[i, j - 4].active = True
+            for j in range(21,-1,-1):
+                for i in range(9,-1,-1):
+                    if self.board1.grids[i,j].active == True:
+                        self.board1.grids[i,j].active = False
+                        self.board1.grids[i,j+4].active = True
+                        self.board1.grids[i,j+4].x_scale = 1
+                        self.board1.grids[i,j+4].y_scale = 1
+            seed = int(self.time[-1])
+            for i in range(9,-1,-1):
+                if i != seed:
+                    self.board1.grids[i,0].active = True
+                    self.board1.grids[i,0].x_scale = 1
+                    self.board1.grids[i,0].y_scale = 1
+                    self.board1.grids[i, 1].active = True
+                    self.board1.grids[i,1].x_scale = 1
+                    self.board1.grids[i,1].y_scale = 1
+                    self.board1.grids[i, 2].active = True
+                    self.board1.grids[i,2].x_scale = 1
+                    self.board1.grids[i,2].y_scale = 1
+                    self.board1.grids[i, 3].active = True
+                    self.board1.grids[i,3].x_scale = 1
+                    self.board1.grids[i,3].y_scale = 1
 
 
 class Title(Screen):
     password = StringProperty('')
     psw =StringProperty( '_ _ _ _ _ _ ')
 
+    def __init__(self,**kwargs):
+        super(Title,self).__init__(**kwargs)
+        self.texture = Texture.create(size=(2, 7), colorfmt='rgba')
+        p1_color = [255, 0,0, 200]
+        p2_color = [255, 165, 0, 200]
+        p3_color = [255, 255, 0, 200]
+        p4_color = [0, 255, 0, 200]
+        p5_color = [0,127, 255,200]
+        p6_color = [0, 0, 255, 200]
+        p7_color = [139, 0, 255, 200]
+
+        p = p1_color*2 + p2_color*2 + p3_color*2 + p4_color*2 +p5_color*2+p6_color*2+p7_color*2
+
+        buf = bytes(p)
+        self.texture.blit_buffer(buf, colorfmt='rgba', bufferfmt='ubyte')
+        self.texture.wrap = 'repeat'
+        with self.canvas.before:
+            self.rect = Rectangle(pos=self.pos, size=self.size, texture=self.texture)
+
+        self._trig = t = Clock.create_trigger(self._update_rect)
+        self.bind(pos=t, size=t)
+
+        Clock.schedule_interval(self._update_texture, 0)
+
+
+    def _update_rect(self, *args):
+        self.rect.size = self.size
+        self.rect.pos = self.pos
+
+
+    def _update_texture(self, *args):
+        a = Clock.get_boottime() * 0.1
+        self.rect.tex_coords = 0,a,1,a,1,1+a,0,1+a
+
     def on_enter(self, *args):
+        self.password = ''
         Clock.schedule_interval(self.update_time, 0)
 
     def update_time(self,*args):

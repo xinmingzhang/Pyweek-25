@@ -1,7 +1,6 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
 
-
 class Control(ScreenManager):
     pass
 
