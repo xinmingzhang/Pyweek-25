@@ -687,8 +687,8 @@ class Title(Screen):
 
 
     def _update_texture(self, *args):
-        a = Clock.get_boottime() * 0.1
-        self.rect.tex_coords = 0,a,1,a,1,1+a,0,1+a
+        a = Clock.get_boottime() * 0.05
+        self.rect.tex_coords = 0,a,0.5,a,0.5,0.5+a,0,0.5+a
 
     def on_enter(self, *args):
         self.password = ''
