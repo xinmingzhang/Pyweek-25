@@ -1,0 +1,102 @@
+#:import W kivy.core.window.Window
+
+<Block>:
+    size_hint: None, None
+    size: (W.height / 20, W.height/ 20) if W.height < W.width else (W.width/20, W.width/20)
+    pos: self.co_x * self.width, self.co_y * self.width
+    opacity: 1 if self.active and self.co_y < 20 else 0
+    canvas.before:
+        PushMatrix
+        Scale:
+            origin: self.center
+            x: self.x_scale
+            y: self.y_scale
+    canvas:
+        Color:
+            rgba: self.color
+        Line:
+            points: [self.x, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
+            width: 1
+            joint: 'bevel'
+            close: True
+        Color:
+            rgba: self.color
+        Rectangle:
+            pos: self.x + self.width / 8.0, self.y + self.width / 8.0
+            size: self.size[0] * 3 / 4.0, self.size[1] * 3 / 4.0
+    canvas.after:
+        PopMatrix
+
+
+<Board>:
+    size_hint:None,None
+    size:(W.height/2, W.height) if W.height < W.width else (W.width/2, W.width)
+    canvas.before:
+        Color:
+            rgba:0,0,0,1
+        Rectangle:
+            size:self.size
+            pos:(0,0)
+        Color:
+            rgba:1,1,1,1
+        Line:
+            points:[0,0,self.size[0],0,self.size[0],self.size[1],0,self.size[1]]
+            width:1
+            joint:'bevel'
+            close:True
+
+<NPiece>:
+
+
+<Margin>:
+    orientation:'vertical' if W.height < W.width else 'horizontal'
+    size_hint:None,None
+    size:((W.width - W.height)/2,W.height) if W.height < W.width else (W.width,(W.height -W.width)/2)
+    canvas:
+        Color:
+            rgb:0,0,0
+        Rectangle:
+            size:self.size
+            pos:self.pos
+
+
+<GameOver>:
+    title:'Game over'
+    size_hint:0.8,0.8
+    BoxLayout:
+        BoxLayout:
+            orientation:'vertical'
+            Label:
+                text:'Score   ' + str(app.root.current_screen.score)
+            Label:
+                text:'High Score   ' + str(app.root.current_screen.high_score)
+            Widget:
+            BoxLayout:
+                orientation:'horizontal'
+                Widget:
+                Button:
+                    text:'replay'
+                    on_press:
+                        root.dismiss()
+                        app.root.current_screen.on_enter()
+                Widget:
+                Button:
+                    text:'back'
+                    on_press:
+                        app.root.transition.direction = 'up'
+                        root.dismiss()
+                        app.root.current='title'
+                Widget:
+            Widget:
+
+<NumKey>:
+    markup:True
+    halign:'center'
+    canvas:
+        Color:
+            rgba:1,1,1,1
+        Line:
+            circle:(self.center[0],self.center[1],self.width/4)
+
+
+
