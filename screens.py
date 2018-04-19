@@ -40,10 +40,6 @@ class Game(Screen):
     score = NumericProperty(0)
     lines = NumericProperty(0)
 
-    # def __init__(self, **kwargs):
-    #     for name in gesture_strings:
-    #         self.register_event_type('on_{}'.format(name))
-    #     super(Game, self).__init__(**kwargs)
 
     def on_enter(self, *args):
         with open('record.json', 'r') as f:
@@ -90,14 +86,16 @@ class Game(Screen):
             self.piece_1_move_right()
         elif key == 275:
             self.piece_2_move_right()
-        # if key in (119,273):
-        #     self.on_bottom_to_top_line()
-        # elif key in (115,274):
-        #     self.on_top_to_bottom_line()
-        # elif key in (97,276):
-        #     self.on_right_to_left_line()
-        # elif key in (100,275):
-        #     self.on_left_to_right_line()
+        if key == 32:
+            self.swap_pieces()
+
+
+    def swap_pieces(self):
+        pass
+
+
+
+
 
 
     def on_score(self,*args):
@@ -234,23 +232,6 @@ class Game(Screen):
         for child in self.piece_2.children:
             child.co_y -= d
 
-
-    # def on_left_to_right_line(self):
-    #     self.piece_1_move_right()
-    #     self.piece_2_move_right()
-    #
-    # def on_right_to_left_line(self):
-    #     self.piece_1_move_left()
-    #     self.piece_2_move_left()
-    #
-    # def on_bottom_to_top_line(self):
-    #     self.piece_1_rotate()
-    #     self.piece_2_rotate()
-    #
-    # def on_top_to_bottom_line(self):
-    #     self.piece_1_hard_drop()
-    #     self.piece_2_hard_drop()
-
     def get_p1_falling_distance(self, block):
         d = block.co_y
         for j in range(d):
@@ -300,8 +281,6 @@ class Game(Screen):
                     self.piece_1_move_left()
                 elif match[1].name == 'right_to_left_line' and touch.x > W / 2:
                     self.piece_2_move_left()
-                # print(match[1].name)
-                # self.dispatch('on_{}'.format(match[1].name))
         super(Game, self).on_touch_up(touch)
 
 
@@ -336,7 +315,6 @@ class Game(Screen):
             self.falling_1.cancel()
             self.falling_2.cancel()
             self.gameover.open()
-
             with open('record.json', 'w') as f:
                 json.dump(self.high_score, f)
         elif True in self.board2.grids_state[:][20]:
